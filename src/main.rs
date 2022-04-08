@@ -13,23 +13,39 @@ fn main() {
     let mut container: BTreeMap<_,_> = BTreeMap::new();
     let keys = vec!["LOG", "PF", "TEF"];
     
-    println!("Enter \"Y\" / \"y\" for YES or \"N\" / \"n\" for NO");
+    println!("Enter \"Y\" / \"y\" for YES or \"N\" / \"n\" for NO\n");
 
     for key in keys {
-        println!("{} attendant?", key);
-        let mut input = String::new();
-        io::stdin().read_line(&mut input).expect("Failed to read input");
-        container.insert(key, input.to_uppercase());
+        loop {
+            println!("{} attendant?", key);
+
+            let mut input = String::new();
+            io::stdin().read_line(&mut input).expect("Failed to read input");
+            let input = input.strip_suffix("\n").unwrap().to_uppercase();
+
+            if input.len() == 1 && input.contains(&String::from("Y")) {
+                container.insert(key, "Y".to_string());
+                break;
+            } else if input.len() == 1 && input.contains(&String::from("N")) {
+                container.insert(key, "N".to_string());
+                break;
+            } else {
+                println!("Not valid: {}", input);
+                println!("Enter \"Y\" / \"y\" for YES or \"N\" / \"n\" for NO\n");
+            }
+        }
     }
 
     let mut idx: i32 = 0;
     let mut table = Table::new();
+
     table.set_format(*format::consts::FORMAT_BOX_CHARS);
     table.set_titles(Row::new(vec![
             Cell::new(&datetime)
                 .with_style(Attr::ForegroundColor(color::RED))
                 .with_hspan(3)]));
     table.add_row(row![FdBwbl->"Index", FdBwbc->"Attendance", FdBwbc->"Yes / No"]);
+
     for (key, value) in &container {
         table.add_row(row![idx, Fb->key, c->value]);
         idx += 1;
@@ -42,13 +58,16 @@ fn main() {
     loop {
         println!("Done?");
         println!("Press \"q\" to quit!");
+
         let mut input = String::new();
         match io::stdin().read_line(&mut input) {
             Ok(_) => {},
             Err(error) => eprintln!("Failed to read input. {}", error),
         }
+        
+        let input = input.strip_suffix("\n").unwrap();
 
-        if input.contains(&String::from("q"))  {
+        if input.len() == 1 && input.contains(&String::from("q"))  {
             std::process::exit(0);
         }
     }
