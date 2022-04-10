@@ -25,7 +25,7 @@ fn main() {
 
 fn exec_clear() -> io::Result<()> {
     if cfg!(target_os = "windows") {
-        Command::new("cmd").args(["/C", "clear"]).status()?;
+        Command::new("cmd").args(["/C", "cls"]).status()?;
         Ok(())
     } else {
         Command::new("clear").status()?;
