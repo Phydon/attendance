@@ -1,4 +1,6 @@
-#[macro_use] extern crate prettytable;
+#[macro_use] 
+extern crate prettytable;
+
 use prettytable::{Table, Row, Attr, Cell, color, format};
 use chrono::Local;
 
@@ -11,16 +13,20 @@ use std::collections::BTreeMap;
 const FILEPATH: &str = "/home/phydon/main/attendance/logfile.txt";
 
 fn main() {
-    let datetime = Local::now().to_string();
-    let container = check_attendance();
-    let table = create_table(datetime, container);
+    loop {
+        let datetime = Local::now().to_string();
+        let container = check_attendance();
+        let table = create_table(datetime, container);
 
-    write_to_file(&table).expect("Failed to write to file");
 
-    exec_clear().expect("Failed to clear screen");
-    table.printstd();
+        let done = are_u_done(&table);
+        if done {
+            write_to_file(&table).expect("Failed to write to file");
+            break;
+        }
+    }
 
-    are_u_done();
+    std::process::exit(0);
 }
 
 fn exec_clear() -> io::Result<()> {
@@ -40,26 +46,30 @@ fn check_attendance() -> BTreeMap<String, String> {
     for key in keys {
         loop {
             exec_clear().expect("Failed to clear screen");
+
             println!("Enter \"Y\" for YES or \"N\" for NO\n");
             println!("{} attendant?", key);
 
             let mut input = String::new();
             io::stdin().read_line(&mut input).expect("Failed to read input");
-            let input = input.strip_suffix("\n").unwrap().to_uppercase();
-            let input_bytes = input.as_bytes()[0];
+            let input = input.strip_suffix('\n').unwrap().to_uppercase();
 
-            const YES: [u8; 1] = *b"Y";
-            const NO: [u8; 1] = *b"N";
-
-            if input_bytes.eq(&YES[0]) {
-                container.insert(key, input);
-                break;
-            } else if input_bytes.eq(&NO[0]) {
-                container.insert(key, input);
-                break;
-            } else {
-                println!("Not valid: {}", input);
+            if input.is_empty() {
+                println!("Please enter something");
                 thread::sleep(Duration::from_millis(1500));
+            } else {
+                let input_bytes = input.as_bytes()[0];
+
+                const YES: [u8; 1] = *b"Y";
+                const NO: [u8; 1] = *b"N";
+
+                if input_bytes.eq(&YES[0]) || input_bytes.eq(&NO[0]) {
+                    container.insert(key, input);
+                    break;
+                } else {
+                    println!("Not valid");
+                    thread::sleep(Duration::from_millis(1500));
+                }
             }
         }
     }
@@ -96,21 +106,36 @@ fn write_to_file(content: &Table) -> io::Result<()> {
     Ok(())
     }
 
-fn are_u_done() {
+fn are_u_done(table: &Table) -> bool {
     loop {
+        exec_clear().expect("Failed to clear screen");
+
+        table.printstd();
+
         println!("Done?");
-        println!("Press \"q\" to quit!");
+        println!("Press \"Y\" to quit or \"N\" to make changes!");
 
         let mut input = String::new();
         io::stdin().read_line(&mut input).expect("Failed to read input");
+        let input = input.strip_suffix('\n').unwrap().to_uppercase();
 
-        exec_clear().expect("Failed to clear screen");
-        
-        let input = input.strip_suffix("\n").unwrap().as_bytes()[0];
-        const QUIT: [u8;1] = *b"q";
+        if input.is_empty() {
+            println!("Please enter something");
+            thread::sleep(Duration::from_millis(1500));
+        } else {
+            let input_bytes = input.as_bytes()[0];
 
-        if input.eq(&QUIT[0])  {
-            std::process::exit(0);
+            const YES: [u8; 1] = *b"Y";
+            const NO: [u8; 1] = *b"N";
+
+            if input_bytes.eq(&YES[0])  {
+                return true;
+            } else if input_bytes.eq(&NO[0]) {
+                return false;
+            } else {
+                println!("Not valid: {}", input);
+                thread::sleep(Duration::from_millis(1500));
+            }
         }
     }
 }
