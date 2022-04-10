@@ -46,15 +46,15 @@ fn check_attendance() -> BTreeMap<String, String> {
             let mut input = String::new();
             io::stdin().read_line(&mut input).expect("Failed to read input");
             let input = input.strip_suffix("\n").unwrap().to_uppercase();
-            let input_bytes = input.as_bytes();
+            let input_bytes = input.as_bytes()[0];
 
             const YES: [u8; 1] = *b"Y";
             const NO: [u8; 1] = *b"N";
 
-            if input_bytes.eq(&YES) {
+            if input_bytes.eq(&YES[0]) {
                 container.insert(key, input);
                 break;
-            } else if input_bytes.eq(&NO) {
+            } else if input_bytes.eq(&NO[0]) {
                 container.insert(key, input);
                 break;
             } else {
@@ -106,10 +106,10 @@ fn are_u_done() {
 
         exec_clear().expect("Failed to clear screen");
         
-        let input = input.strip_suffix("\n").unwrap().as_bytes();
+        let input = input.strip_suffix("\n").unwrap().as_bytes()[0];
         const QUIT: [u8;1] = *b"q";
 
-        if input.eq(&QUIT)  {
+        if input.eq(&QUIT[0])  {
             std::process::exit(0);
         }
     }
