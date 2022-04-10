@@ -10,7 +10,9 @@ use std::{io, fs, thread};
 use std::io::Write;
 use std::collections::BTreeMap;
 
-const FILEPATH: &str = "/home/phydon/main/attendance/logfile.txt";
+const FILEPATH: &str = "./logfile.txt";
+const YES: [u8; 1] = *b"Y";
+const NO: [u8; 1] = *b"N";
 
 fn main() {
     loop {
@@ -26,6 +28,7 @@ fn main() {
         }
     }
 
+    exec_clear().expect("Failed to clear screen");
     std::process::exit(0);
 }
 
@@ -56,19 +59,16 @@ fn check_attendance() -> BTreeMap<String, String> {
 
             if input.is_empty() {
                 println!("Please enter something");
-                thread::sleep(Duration::from_millis(1500));
+                thread::sleep(Duration::from_millis(1200));
             } else {
                 let input_bytes = input.as_bytes()[0];
-
-                const YES: [u8; 1] = *b"Y";
-                const NO: [u8; 1] = *b"N";
 
                 if input_bytes.eq(&YES[0]) || input_bytes.eq(&NO[0]) {
                     container.insert(key, input);
                     break;
                 } else {
                     println!("Not valid");
-                    thread::sleep(Duration::from_millis(1500));
+                    thread::sleep(Duration::from_millis(1200));
                 }
             }
         }
@@ -121,12 +121,9 @@ fn are_u_done(table: &Table) -> bool {
 
         if input.is_empty() {
             println!("Please enter something");
-            thread::sleep(Duration::from_millis(1500));
+            thread::sleep(Duration::from_millis(1200));
         } else {
             let input_bytes = input.as_bytes()[0];
-
-            const YES: [u8; 1] = *b"Y";
-            const NO: [u8; 1] = *b"N";
 
             if input_bytes.eq(&YES[0])  {
                 return true;
@@ -134,7 +131,7 @@ fn are_u_done(table: &Table) -> bool {
                 return false;
             } else {
                 println!("Not valid: {}", input);
-                thread::sleep(Duration::from_millis(1500));
+                thread::sleep(Duration::from_millis(1200));
             }
         }
     }
