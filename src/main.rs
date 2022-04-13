@@ -11,8 +11,6 @@ use std::io::Write;
 use std::collections::BTreeMap;
 
 const FILEPATH: &str = "./logfile.txt";
-const YES: [u8; 1] = *b"Y";
-const NO: [u8; 1] = *b"N";
 
 fn main() {
     loop {
@@ -44,7 +42,17 @@ fn exec_clear() -> io::Result<()> {
 
 fn check_attendance() -> BTreeMap<String, String> {
     let mut container: BTreeMap<_,_> = BTreeMap::new();
-    let keys: Vec<String> = vec!["LOG".to_string(), "PF".to_string(), "TEF".to_string()];
+    let keys: Vec<String> = vec![
+        "A".to_string(), 
+        "B".to_string(), 
+        "C".to_string(),
+        "D".to_string(),
+        "E".to_string(),
+        "F".to_string(),
+        "G".to_string(),
+        "H".to_string(),
+        "I".to_string()
+    ];
     
     for key in keys {
         loop {
@@ -55,21 +63,16 @@ fn check_attendance() -> BTreeMap<String, String> {
 
             let mut input = String::new();
             io::stdin().read_line(&mut input).expect("Failed to read input");
-            let input = input.strip_suffix('\n').unwrap().to_uppercase();
 
-            if input.is_empty() {
-                println!("Please enter something");
-                thread::sleep(Duration::from_millis(1200));
-            } else {
-                let input_bytes = input.as_bytes()[0];
-
-                if input_bytes.eq(&YES[0]) || input_bytes.eq(&NO[0]) {
-                    container.insert(key, input);
+            match input.trim() {
+                "y" | "Y" | "n" | "N" => {
+                    container.insert(key, input.to_uppercase());
                     break;
-                } else {
+                },
+                _ => {
                     println!("Not valid");
                     thread::sleep(Duration::from_millis(1200));
-                }
+                },
             }
         }
     }
@@ -117,22 +120,14 @@ fn are_u_done(table: &Table) -> bool {
 
         let mut input = String::new();
         io::stdin().read_line(&mut input).expect("Failed to read input");
-        let input = input.strip_suffix('\n').unwrap().to_uppercase();
 
-        if input.is_empty() {
-            println!("Please enter something");
-            thread::sleep(Duration::from_millis(1200));
-        } else {
-            let input_bytes = input.as_bytes()[0];
-
-            if input_bytes.eq(&YES[0])  {
-                return true;
-            } else if input_bytes.eq(&NO[0]) {
-                return false;
-            } else {
-                println!("Not valid: {}", input);
+        match input.trim().to_uppercase().as_str() {
+            "y" | "Y" => return true,
+            "n" | "N" => return false,
+            _ => {
+                println!("Not valid");
                 thread::sleep(Duration::from_millis(1200));
-            }
+            },
         }
     }
 }
