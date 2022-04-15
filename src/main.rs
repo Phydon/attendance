@@ -3,7 +3,9 @@ extern crate prettytable;
 
 use prettytable::{Table, Row, Attr, Cell, color, format};
 use chrono::Local;
+use indicatif::{ProgressBar, ProgressStyle};
 
+use std::cmp::min;
 use std::process::Command;
 use std::time::Duration;
 use std::{io, fs, thread};
@@ -40,6 +42,31 @@ fn exec_clear() -> io::Result<()> {
     }
 }
 
+fn sleep(num: u64) {
+    thread::sleep(Duration::from_millis(num));
+}
+
+fn progress_bar() {
+    println!("\n");
+
+    let mut idx = 0;
+    let end = 750;
+
+    let pb = ProgressBar::new(end);
+    pb.set_style(ProgressStyle::default_bar()
+        .template("{spinner:.green} [{wide_bar:.cyan/blue}] ({eta})")
+        .progress_chars("#>-"));
+
+    while idx < end {
+        let new = min(idx + 10, end);
+        idx = new;
+        pb.set_position(new);
+        sleep(15);
+    }
+
+    pb.finish_with_message("done");
+}
+
 fn check_attendance() -> BTreeMap<String, String> {
     let mut container: BTreeMap<_,_> = BTreeMap::new();
     let keys: Vec<String> = vec![
@@ -71,7 +98,7 @@ fn check_attendance() -> BTreeMap<String, String> {
                 },
                 _ => {
                     println!("Not valid");
-                    thread::sleep(Duration::from_millis(1200));
+                    progress_bar();
                 },
             }
         }
@@ -126,7 +153,7 @@ fn are_u_done(table: &Table) -> bool {
             "n" | "N" => return false,
             _ => {
                 println!("Not valid");
-                thread::sleep(Duration::from_millis(1200));
+                progress_bar();
             },
         }
     }
